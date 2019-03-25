@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
         }
     }
     MPI_Status status;
-    printf("I'm %d of %d. My rows from %d to %d. Read from %d to %d\n", rank, total, prevRowsCount, prevRowsCount + rows - 1, prevRowsCount - 1, prevRowsCount + rows);
+    // printf("I'm %d of %d. My rows from %d to %d. Read from %d to %d\n", rank, total, prevRowsCount, prevRowsCount + rows - 1, prevRowsCount - 1, prevRowsCount + rows);
 
     MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
@@ -69,6 +69,8 @@ int main(int argc, char **argv) {
                                   + data[IDX(i, j - 1)] + data[IDX(i, j + 1)]) / 4;
             }
         }
+        MPI_Buffer_detach(&buf, &bufSz);
+        MPI_Buffer_attach(buf, bufSz);
         if (rank > 0) {
             MPI_Bsend(data + IDX(1, 0), m, MPI_DOUBLE, rank - 1, 0, MPI_COMM_WORLD);
         }
@@ -84,7 +86,7 @@ int main(int argc, char **argv) {
     }
     MPI_Barrier(MPI_COMM_WORLD);
     if (rank == 0) {
-        printf("time %lf\n", MPI_Wtime() - start);
+        printf("%lf\n", MPI_Wtime() - start);
         fs = fopen("output.bin", "w");
         fclose(fs);
     }
